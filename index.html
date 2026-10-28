@@ -44,6 +44,18 @@
   app.src = APP + (v ? '?v=' + encodeURIComponent(v) : '');
   // Permite instalarla como app en la compu (Chrome / Edge: ícono "Instalar" en la barra de direcciones)
   if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
+  // En la compu, la app instalada abre ocupando toda la pantalla (no en ventanita)
+  (function () {
+    try {
+      var instalada = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: window-controls-overlay)').matches;
+      var compu = screen.availWidth >= 900 && matchMedia('(pointer: fine)').matches;
+      if (!instalada || !compu) return;
+      if (window.outerWidth < screen.availWidth * 0.9 || window.outerHeight < screen.availHeight * 0.9) {
+        window.moveTo(screen.availLeft || 0, screen.availTop || 0);
+        window.resizeTo(screen.availWidth, screen.availHeight);
+      }
+    } catch (e) {}
+  })();
 </script>
 </body>
 </html>
