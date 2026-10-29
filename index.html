@@ -39,14 +39,19 @@
   var APP = 'https://script.google.com/macros/s/AKfycbxK-O2X6FiwjYNiECgzmhaCNYm9Tf_5V_1CVZariZli8Zysf_5bpTHQeZn-Ty8W0q8f/exec';
   // ⬆⬆⬆  no hace falta tocar nada más  ⬆⬆⬆
 
-  var v = '';
-  try { v = new URLSearchParams(location.search).get('v') || localStorage.getItem('bp-vendedor') || ''; if (v) localStorage.setItem('bp-vendedor', v); } catch (e) {}
+  var v = '', ap = null;
+  try {
+    var qs = new URLSearchParams(location.search);
+    // Botón "Aprobar" de los mails: se pasa tal cual a la app (no cambia el vendedor guardado en este equipo)
+    if (qs.get('ap') && qs.get('u') && qs.get('t')) ap = 'ap=' + encodeURIComponent(qs.get('ap')) + '&u=' + encodeURIComponent(qs.get('u')) + '&t=' + encodeURIComponent(qs.get('t')) + (qs.get('f') ? '&f=1' : '');
+    else { v = qs.get('v') || localStorage.getItem('bp-vendedor') || ''; if (v) localStorage.setItem('bp-vendedor', v); }
+  } catch (e) {}
   var app = document.getElementById('app');
   function listo() { document.getElementById('splash').classList.add('fuera'); }
   app.onload = listo;
   setTimeout(function () { document.getElementById('txt').textContent = 'Ya casi'; }, 3500);
   setTimeout(listo, 9000);   // por las dudas, nunca queda trabada
-  app.src = APP + (v ? '?v=' + encodeURIComponent(v) : '');
+  app.src = APP + (ap ? '?' + ap : (v ? '?v=' + encodeURIComponent(v) : ''));
   // Permite instalarla como app en la compu (Chrome / Edge: ícono "Instalar" en la barra de direcciones)
   if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
   // En el celular la app queda siempre vertical (Android instalada: se traba; iPhone: aviso si se acuesta)
