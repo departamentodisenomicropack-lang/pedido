@@ -1,0 +1,127 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aprobar pedido · Brief POP</title><link rel="icon" type="image/png" href="icon-192.png"><meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+:root{--ink:#000;--ink2:#464646;--muted:#7a7878;--fill:#f2f2f2;--line:#dcdcdc;--acc:#a35e47;--accs:#f6ece8;--acci:#8c4e3a;--red:#b3261e;--reds:#f9dedc}
+*{box-sizing:border-box}html,body{margin:0;background:#e8e8e8;font-family:Archivo,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink)}
+.app{max-width:520px;margin:0 auto;min-height:100vh;background:#fff;padding:22px 18px 28px;display:flex;flex-direction:column}
+@media(min-width:560px){.app{margin:3vh auto;min-height:auto;border-radius:36px;padding:28px 28px 30px}}
+.top{display:flex;justify-content:space-between;align-items:center}.logo{font-weight:900;font-stretch:125%;font-size:18px;letter-spacing:-.02em;line-height:1}.logo small{display:block;font-size:6px;letter-spacing:.9em;font-weight:700;font-stretch:100%;margin-top:3px}
+.cod{background:var(--fill);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800}
+.wide{font-weight:900;font-stretch:125%;letter-spacing:-.03em;line-height:.98}
+.caps{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+.hero{background:#000;color:#fff;border-radius:24px;padding:20px 20px 18px;margin-top:18px;position:relative;overflow:hidden}
+.hero .caps{color:#c9c7c7}.hero h1{margin:8px 0 0;font-size:34px}.hero p{margin:8px 0 0;font-size:15px;color:#e6e4e4;line-height:1.35}
+.hero ul{margin:12px 0 0;padding:0;list-style:none;font-size:14px;color:#c9c7c7;line-height:1.5}
+.pill{display:inline-block;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;margin:0 6px 0 0}
+.sec{margin-top:22px}.sec label,.sec .caps{display:block;margin-bottom:8px}
+input[type=text],textarea{width:100%;background:var(--fill);border:0;border-radius:16px;padding:14px 16px;font:inherit;font-size:16px;color:var(--ink)}
+textarea{resize:none}input:focus,textarea:focus{outline:3px solid var(--acc);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border:0;border-radius:999px;padding:10px 14px;font:inherit;font-size:14px;font-weight:700;background:var(--fill);color:var(--ink);cursor:pointer;min-height:44px}
+.chip[aria-pressed=true]{background:#000;color:#fff}
+.btn{display:block;width:100%;border:0;border-radius:22px;padding:19px;font:inherit;font-size:17px;font-weight:800;cursor:pointer;margin-top:22px;text-align:center;text-decoration:none}
+.btn.acc{background:var(--acc);color:#fff}.btn.ink{background:#000;color:#fff}.btn:disabled{opacity:.5}
+.lnk{display:block;text-align:center;margin-top:14px;font-size:14px;color:var(--ink2);background:none;border:0;font:inherit;text-decoration:underline;cursor:pointer;width:100%}
+.msg{margin-top:18px;border-radius:18px;padding:16px 18px;font-size:15px;line-height:1.45}.msg.warn{background:var(--reds);color:var(--red);font-weight:600}.msg.info{background:var(--accs);color:var(--acci)}
+.ok{margin-top:40px}.ok .badge{width:92px;height:92px}.ok h1{font-size:38px;margin:22px 0 0}.ok p{font-size:16px;color:var(--ink2);line-height:1.45}
+.hint{font-size:13px;color:var(--ink2);margin-top:8px;line-height:1.4}
+.spin{display:inline-block;width:16px;height:16px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:g 1s linear infinite;vertical-align:-3px;margin-right:8px}@keyframes g{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style></head><body><main class="app" id="app"></main>
+<script>
+// ⬇ Misma URL de la aplicación web que en index.html (la que termina en /exec)
+var APP = 'https://script.google.com/macros/s/AKfycbxK-O2X6FiwjYNiECgzmhaCNYm9Tf_5V_1CVZariZli8Zysf_5bpTHQeZn-Ty8W0q8f/exec';
+var Q = (function(){ var o = {}; try { new URLSearchParams(location.search).forEach(function(v, k){ o[k] = v; }); } catch (e) {} return o; })();
+var D = { cargando: true, codigo: Q.ap || '' };
+// Habla con Apps Script SIN cookies de Google: así no importa cuántas cuentas tenga abiertas el navegador
+function api(q){
+  var u = APP + '?' + Object.keys(q).map(function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]); }).join('&');
+  return fetch(u, { credentials: 'omit', redirect: 'follow', cache: 'no-store' })
+    .then(function(r){ return r.text(); })
+    .then(function(t){ try { return JSON.parse(t); } catch (e) { throw new Error('La app de Google no respondió bien. Revisá que la implementación tenga acceso "Cualquier persona".'); } });
+}
+var GALLETA = 'M100 50L98.6 54.3L95.3 58L91.7 61.2L89.5 64.4L89.1 68.2L89.8 73L90 78L88.3 82.1L84.5 84.5L79.6 85.2L74.8 85.4L71 86.4L68.2 89.1L65.7 93.2L62.6 97.2L58.7 99.2L54.3 98.6L50 96L46.2 93L42.7 91.4L38.8 91.7L34.3 93.2L29.4 94.3L25 93.3L22 90L20.4 85.2L19.5 80.5L17.8 77L14.6 74.8L10.2 73L5.7 70.6L3 67.1L2.8 62.6L4.7 58L7 53.8L8 50L7 46.2L4.7 42L2.8 37.4L3 32.9L5.7 29.4L10.2 27L14.6 25.2L17.8 23L19.5 19.5L20.4 14.8L22 10L25 6.7L29.4 5.7L34.3 6.8L38.8 8.3L42.7 8.6L46.2 7L50 4L54.3 1.4L58.7 .8L62.6 2.8L65.7 6.8L68.2 10.9L71 13.6L74.8 14.6L79.6 14.8L84.5 15.5L88.3 17.9L90 22L89.8 27L89.1 31.8L89.5 35.6L91.7 38.8L95.3 42L98.6 45.7Z';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function $(s){return document.querySelector(s);}
+var vista = D.vista || 'ap', enviando = false, res = null, err = '';
+var FALTA = ['Material','Medidas','Cantidades','Artes','Fotos del lugar','Fecha','Carga del producto','Forma de entrega'];
+var selFalta = {}, selEt = {}, selMi = {};
+(D.miembros||[]).forEach(function(m){ if (m.on) selMi[m.u] = true; });
+function cabecera(){ return '<div class="top"><div class="logo">MICROPACK<small>AMERICAS</small></div>' + (D.codigo ? '<span class="cod">' + esc(D.codigo) + '</span>' : '') + '</div>'; }
+function badge(color, inner){ return '<svg class="badge" viewBox="0 0 100 100" aria-hidden="true"><path d="' + GALLETA + '" fill="' + color + '"/>' + inner + '</svg>'; }
+function hero(){
+  return '<section class="hero"><div>' + (D.prueba ? '<span class="pill" style="background:#fff;color:#000">PRUEBA</span>' : '') + (D.urgente ? '<span class="pill" style="background:#fff;color:#b3261e">URGENTE</span>' : '') + '</div>' +
+    '<div class="caps" style="margin-top:' + (D.prueba||D.urgente ? 14 : 0) + 'px">' + esc(D.vendedor) + ' · para ' + esc(D.fecha) + '</div><h1 class="wide">' + esc(D.cliente) + '</h1>' +
+    (D.ruta ? '<p>' + esc(D.ruta) + '</p>' : '') + '<ul>' + D.items.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+    (D.carpeta ? '<p style="margin-top:12px"><a href="' + esc(D.carpeta) + '" target="_blank" rel="noopener" style="color:#fff;font-weight:700">Ver carpeta del pedido →</a></p>' : '') + '</section>';
+}
+function render(){
+  var h = cabecera();
+  if (D.cargando) { h += '<div class="ok" style="text-align:center"><svg class="badge" viewBox="0 0 100 100" aria-hidden="true" style="width:72px;height:72px;margin:0 auto;display:block;animation:g 2.4s linear infinite"><path d="' + GALLETA + '" fill="#a35e47"/></svg><p>Abriendo el pedido…</p></div>'; $('#app').innerHTML = h; return; }
+  if (D.error) { h += '<div class="ok"><h1 class="wide">No se puede abrir</h1><p>' + esc(D.error) + '</p></div>'; $('#app').innerHTML = h; return; }
+  if (res && res.ok && vista === 'ap') {
+    h += '<div class="ok">' + badge('#a35e47','<path d="M30 51l13 13 27-28" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>') +
+      '<h1 class="wide">¡Listo, ' + esc(String(D.quien).replace(/^D[igl]\.?\s*/i,'')) + '!</h1><p>' + (res.prueba ? 'La tarjeta de <b>prueba</b> va camino a Trello' : 'El pedido va camino a Trello') + ', a la lista <b>Desarrollo en Estudio de Diseño</b>. Puede tardar uno o dos minutos en aparecer.</p>' +
+      '<p class="hint">' + esc(res.msg) + '. Queda anotado en la planilla.</p>' + (res.prueba ? '<div class="msg info">Cuando termines de revisarla, borrala a mano en Trello. Brief POP nunca borra nada.</div>' : '') + '</div>';
+    $('#app').innerHTML = h; return;
+  }
+  if (res && res.ok && vista === 'falta') {
+    h += '<div class="ok">' + badge('#e8e8e8','<text x="50" y="62" text-anchor="middle" font-size="34" font-weight="900" fill="#000">!</text>') + '<h1 class="wide">Avisado</h1><p>' + esc(res.msg) + ' El pedido queda en <b>Falta información</b> y no entra a Trello hasta que alguien lo apruebe.</p></div>';
+    $('#app').innerHTML = h; return;
+  }
+  if (D.ya) {
+    h += '<div class="ok">' + badge('#e8e8e8','<path d="M30 51l13 13 27-28" fill="none" stroke="#000" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>') +
+      '<h1 class="wide">Ya está en Trello</h1><p>' + esc(D.ya) + '. No se creó otra tarjeta.</p></div>';
+    $('#app').innerHTML = h; return;
+  }
+  h += hero();
+  if (vista === 'falta') {
+    h += '<h2 class="wide" style="font-size:28px;margin:26px 0 0">¿Qué le pedimos a ' + esc(D.vendedor) + '?</h2>' +
+      '<div class="sec"><div class="chips">' + FALTA.map(function(x){ return '<button type="button" class="chip" data-f="' + esc(x) + '" aria-pressed="' + (!!selFalta[x]) + '">' + esc(x) + '</button>'; }).join('') + '</div></div>' +
+      '<div class="sec"><label for="det" class="caps">Detalle (opcional)</label><textarea id="det" rows="4" placeholder="Ej.: medidas de la góndola donde va la tira"></textarea>' +
+      '<p class="hint">El pedido pasa a "Falta información" y le llega un mail a ' + esc(D.vendedor) + '.</p></div>' +
+      (err ? '<div class="msg warn" role="alert">' + esc(err) + '</div>' : '') +
+      '<button class="btn acc" id="go" ' + (enviando ? 'disabled' : '') + '>' + (enviando ? '<span class="spin"></span>Avisando…' : 'Avisarle a ' + esc(D.vendedor)) + '</button>' +
+      '<button class="lnk" data-v="ap">Volver a aprobar</button>';
+  } else {
+    if (D.bloqueo) h += '<div class="msg warn" role="alert">' + esc(D.bloqueo) + '</div>';
+    else {
+      h += '<div class="sec"><label for="tit" class="caps">Título de la tarjeta</label><input type="text" id="tit" maxlength="180" value="' + esc(D.titulo) + '">' + (D.prueba ? '<p class="hint">Va a salir como "PRUEBA - …".</p>' : '') + '</div>' +
+        '<div class="sec"><label for="op" class="caps">N° de OP (si ya lo tiene)</label><input type="text" id="op" inputmode="numeric" maxlength="8" placeholder="Opcional"></div>' +
+        '<div class="sec"><span class="caps">Etiquetas</span><div class="chips">' + D.etiquetas.map(function(x){ return '<button type="button" class="chip" data-e="' + esc(x) + '" aria-pressed="' + (!!selEt[x]) + '">' + esc(x) + '</button>'; }).join('') + '</div></div>' +
+        '<div class="sec"><span class="caps">Miembros de la tarjeta</span>' + (D.prueba ? '<p class="hint" style="margin-top:0">En una prueba, el único miembro sos vos.</p>' : '') + '<div class="chips">' + D.miembros.map(function(m){ return '<button type="button" class="chip" data-m="' + esc(m.u) + '" aria-pressed="' + (!!selMi[m.u]) + '"' + (D.prueba ? ' disabled' : '') + '>' + esc(m.n) + '</button>'; }).join('') + '</div></div>' +
+        (err ? '<div class="msg warn" role="alert">' + esc(err) + '</div>' : '') +
+        '<button class="btn acc" id="go" ' + (enviando ? 'disabled' : '') + '>' + (enviando ? '<span class="spin"></span>Creando la tarjeta…' : '✓ Aprobar y pasar a Trello') + '</button>';
+    }
+    h += '<button class="lnk" data-v="falta">Falta información</button>';
+  }
+  $('#app').innerHTML = h;
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest('button'); if (!b || b.disabled) return;
+  if (b.dataset.v) { vista = b.dataset.v; err = ''; render(); return; }
+  if (b.dataset.f) { selFalta[b.dataset.f] = !selFalta[b.dataset.f]; b.setAttribute('aria-pressed', !!selFalta[b.dataset.f]); return; }
+  if (b.dataset.e) { selEt[b.dataset.e] = !selEt[b.dataset.e]; b.setAttribute('aria-pressed', !!selEt[b.dataset.e]); return; }
+  if (b.dataset.m) { selMi[b.dataset.m] = !selMi[b.dataset.m]; b.setAttribute('aria-pressed', !!selMi[b.dataset.m]); return; }
+  if (b.id === 'go') {
+    var base = { codigo: D.codigo, u: D.u, t: D.t };
+    var listo = function(r){ enviando = false; if (r && r.ok) { res = r; } else { err = (r && r.msg) || 'No se pudo.'; if (r && r.ya) { D.ya = r.msg; } } render(); };
+    var falla = function(x){ enviando = false; err = x && x.message ? x.message : 'No se pudo conectar. Probá de nuevo.'; render(); };
+    if (vista === 'falta') {
+      base.que = Object.keys(selFalta).filter(function(k){ return selFalta[k]; }); base.detalle = ($('#det')||{}).value || '';
+      if (!base.que.length && !base.detalle.trim()) { err = 'Marcá qué falta o escribí un detalle.'; render(); return; }
+      enviando = true; render(); api({ api: 'falta', ap: base.codigo, u: base.u, t: base.t, que: base.que.join('|'), detalle: base.detalle }).then(listo).catch(falla);
+    } else {
+      base.titulo = $('#tit').value; base.op = $('#op').value;
+      base.etiquetas = Object.keys(selEt).filter(function(k){ return selEt[k]; });
+      base.miembros = Object.keys(selMi).filter(function(k){ return selMi[k]; });
+      enviando = true; render(); api({ api: 'aprobar', ap: base.codigo, u: base.u, t: base.t, titulo: base.titulo, op: base.op, etiquetas: base.etiquetas.join('|'), miembros: base.miembros.join('|') }).then(listo).catch(falla);
+    }
+  }
+});
+render();
+if (!Q.ap || !Q.u || !Q.t) { D = { error: 'Al link le falta información. Abrilo de nuevo desde el botón del mail.' }; render(); }
+else api({ api: 'ap', ap: Q.ap, u: Q.u, t: Q.t })
+  .then(function(d){ D = d || { error: 'Sin respuesta.' }; vista = Q.f ? 'falta' : 'ap'; (D.miembros || []).forEach(function(m){ if (m.on) selMi[m.u] = true; }); render(); })
+  .catch(function(e){ D = { error: 'No se pudo conectar: ' + (e && e.message || e) }; render(); });
+</script></body></html>
